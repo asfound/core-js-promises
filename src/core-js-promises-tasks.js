@@ -105,15 +105,9 @@ function getAllOrNothing(promises) {
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)]  => Promise fulfilled with [1, null, 3]
  */
 function getAllResult(promises) {
-  const rejectHandler = () => null;
-
-  const resolveHandler = (value) => value;
-
-  const convertedPromises = promises.map((promise) =>
-    Promise.resolve(promise).then(resolveHandler, rejectHandler)
+  return Promise.allSettled(promises).then((array) =>
+    array.map((result) => (result.status === 'rejected' ? null : result.value))
   );
-
-  return Promise.all(convertedPromises);
 }
 
 /**
