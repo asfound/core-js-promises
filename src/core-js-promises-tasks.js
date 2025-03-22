@@ -33,8 +33,14 @@ function getPromise(number) {
  * Promise.resolve('success') => promise that will be fulfilled with 'success' value
  * Promise.reject('fail')     => promise that will be fulfilled with 'fail' value
  */
-function getPromiseResult(source) {
-  return source.then(() => 'success').catch(() => 'fail');
+async function getPromiseResult(source) {
+  try {
+    await source;
+
+    return 'success';
+  } catch {
+    return 'fail';
+  }
 }
 
 /**
@@ -104,9 +110,11 @@ function getAllOrNothing(promises) {
  * [Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)] => Promise fulfilled with [1, 2, 3]
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)]  => Promise fulfilled with [1, null, 3]
  */
-function getAllResult(promises) {
-  return Promise.allSettled(promises).then((array) =>
-    array.map((result) => (result.status === 'rejected' ? null : result.value))
+async function getAllResult(promises) {
+  const array = await Promise.allSettled(promises);
+
+  return array.map((result) =>
+    result.status === 'rejected' ? null : result.value
   );
 }
 
@@ -129,8 +137,11 @@ function getAllResult(promises) {
  * [promise1, promise4, promise3, promise2] => Promise.resolved('10403020')
  */
 function queuePromises(promises) {
-  return promises.reduce((acc, curr) => {
-    return acc.then((sum) => curr.then((result) => sum + result));
+  return promises.reduce(async (acc, curr) => {
+    const sum = await acc;
+    const result = await curr;
+
+    return sum + result;
   }, Promise.resolve(''));
 }
 
